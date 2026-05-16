@@ -1,0 +1,9 @@
+z_info
+convenex-backend/node_modules
+convenex-frontend/node_modules
+
+convenex-backend/.env
+convenex-frontend/.env
+
+dist
+build

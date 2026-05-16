@@ -1,0 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Roboto:wght@300;400;500&display=swap');
+@import "tailwindcss";
+body{
+  margin:0;/*react adds some default margin padding, to remove that set them to 0*/
+  padding:0;
+  box-sizing: border-box;/*content+padding+border would together form the specified width(No increase in width due to padding/border)*/
+  /* font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal; */
+}

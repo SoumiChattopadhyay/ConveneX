@@ -1,0 +1,6 @@
+.searchInp{
+    transition: width 0.5s;
+}
+.searchInp:focus{
+    width:300px;
+}
