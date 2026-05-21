@@ -74,6 +74,12 @@ const UserSchema = new mongoose.Schema({//See the /profile page
             },
         },
     ],
+    registeredEvents:[
+        {
+            type:mongoose.Schema.Types.ObjectId,
+            ref:"Event"
+        }
+    ]
 },{timestamps:true}//to keep track when this user entry was created in Database and when any kind of updations were made in this database entry
 );
 

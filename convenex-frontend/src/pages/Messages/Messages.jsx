@@ -24,17 +24,17 @@ const Messages = () => {
   const [loading, setLoading] = useState(false);
 
   const ref = useRef();
-  useEffect(()=>{
-    ref?.current?.scrollIntoView({behavior:"smooth"});
-  },[msgs]);
+  useEffect(() => {
+    ref?.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs]);
 
   const fetchConvosOnLoad = async () => {//whenever all convs where current user is one member are loaded, user's first conversation is considered the default selected conversation and its messages are shown
-    await axios.get("http://localhost:4000/api/conversation/get-conversation", { withCredentials: true }).then((res) => {
+    await axios.get("http://localhost:4000/api/conversation/get-conversations", { withCredentials: true }).then((res) => {
       console.log(res);
       setConvos(res?.data?.conversations);
       let member = res?.data?.conversations[0]?.members?.find((it) => it?._id !== ownData?._id);
       handleSelectedConvo(res?.data?.conversations[0]?._id, member);
-      socket.emit("joinConversation",res?.data?.conversations[0]?._id);//whenever curr user opens his Messages page, immediately emit an event saying User has joined his first convo 
+      socket.emit("joinConversation", res?.data?.conversations[0]?._id);//whenever curr user opens his Messages page, immediately emit an event saying User has joined his first convo 
     }).catch((err) => {
       console.log(err);
       toast.error(err?.response?.data?.error);
@@ -50,7 +50,7 @@ const Messages = () => {
   const handleSelectedConvo = (convoId, userData) => {//Then Whenever another conv is selected manually by the curr user, that convo becomes the selected convo
     setSelectedConvoId(convoId);
     setSelectedConvoOtherMember(userData);
-    socket.emit("joinConversation",convoId);//whenever user selects another convo, immediately emit an event saying User has joined that particular convo
+    socket.emit("joinConversation", convoId);//whenever user selects another convo, immediately emit an event saying User has joined that particular convo
   }
 
   const handleShowMessages = async () => {
@@ -63,18 +63,28 @@ const Messages = () => {
     });
   }
   useEffect(() => {
-    if(selectedConvoId){
+    if (selectedConvoId) {
       handleShowMessages();
     }
   }, [selectedConvoId]);
 
-  useEffect(()=>{
-    socket.on('receiveMessage',(response)=>{
+  useEffect(() => {
+    socket.on('receiveMessage', (response) => {
       console.log(response);
-      setMsgs([...msgs,response]);
+      setMsgs([...msgs, response]);
     });
-  },[msgs]);
+  }, [msgs]);
 
+  const handleSendMessage = async () => {
+    await axios.post('http://localhost:4000/api/message', { conversation: selectedConvoId, message: msgInp, picture: imgInp }, { withCredentials: true }).then((res) => {
+      console.log(res);
+      socket.emit('sendMessage', selectedConvoId, res?.data);
+      setMsgInp("");
+    }).catch((err) => {
+      console.log(err);
+      toast.error(err?.response?.data?.error);
+    });
+  }
   const handleImgUpload = async (e) => {
     let files = e.target.files;
     const data = new FormData();
@@ -91,17 +101,6 @@ const Messages = () => {
       setLoading(false);
     }
   }
-  const handleSendMessage = async () => {
-    await axios.post('http://localhost:4000/api/message', { conversation: selectedConvoId, message: msgInp, picture: imgInp }, { withCredentials: true }).then((res) => {
-      console.log(res);
-      socket.emit('sendMessage',selectedConvoId,res?.data);
-      setMsgInp("");
-    }).catch((err) => {
-      console.log(err);
-      toast.error(err?.response?.data?.error);
-    });
-  }
-
   return (
     <div className='px-5 py-5 xl:px-50 flex gap-5 w-full bg-[#f5f2f7] h-full'>
 
@@ -123,7 +122,7 @@ const Messages = () => {
               {
                 convos.map((item, index) => {
                   return <div key={index}>
-                    <Conversation item={item} ownData={ownData} handleSelectedConvo={handleSelectedConvo} selectedConvoId={selectedConvoId}/>
+                    <Conversation item={item} ownData={ownData} handleSelectedConvo={handleSelectedConvo} selectedConvoId={selectedConvoId} />
                   </div>
                 })
               }
@@ -152,15 +151,54 @@ const Messages = () => {
                 {/* for each message */}
                 {
                   msgs?.map((item, index) => {
-                    return <div ref={ref} key={index} className="w-full p-4 flex items-start gap-3 cursor-pointer">
-                      <div className="shrink-0">
-                        <img className='w-8 h-8 rounded-4xl' src={item?.sender?.profilePic} alt="" />
-                      </div>
-                      <div className='mb-2 w-full'>
-                        <div className='text-md font-semibold'>{item?.sender?._id===ownData?._id?"Me":item?.sender?.f_name}</div>
-                        <div className='mt-6 text-sm hover:bg-gray-200'>{item?.message}</div>
+                    const isOwnMessage = item?.sender?._id === ownData?._id;
+                    return <div ref={ref} key={index} className={`w-full px-3 py-1 cursor-pointer`}>
+                      <div className={`flex mb-4 ${isOwnMessage ? "justify-end" : "justify-start"}`}>
+                        <div className="shrink-0">
+                          {!isOwnMessage && <img className='mr-2 w-8 h-8 rounded-4xl' src={item?.sender?.profilePic} alt="" />}
+                        </div>
                         {
-                          item?.picture && <div className='my-2'><img className='w-60 h-45' src={item?.picture} alt="msg-pic" /></div>
+                          !item?.picture && item?.message && <div className={`${isOwnMessage ? "bg-violet-100" : "bg-[#f5f2f7]"} rounded-md flex gap-3`}>
+                            <div>
+                              <div className={`${isOwnMessage ? "mx-1 mt-1" : ""}text-sm font-semibold m-2`}>{item?.sender?._id === ownData?._id ? "" : item?.sender?.f_name}</div>
+                              <div className={`text-sm px-2 pb-2`}>{item?.message}</div>
+                            </div>
+
+                            {/* time */}
+                            <span className="text-[11px] p-1 mt-auto text-gray-500 text-right">
+                              {
+                                new Date(item?.createdAt)
+                                  .toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                  })
+                              }
+
+                            </span>
+                          </div>
+                        }
+                        {
+                          item?.picture && <div className={`${isOwnMessage ? "bg-violet-100" : "bg-[#f5f2f7]"} rounded-md flex flex-col`}>
+                            <div>
+                              <div className={`${isOwnMessage ? "mx-1 mt-1" : ""}text-sm font-semibold m-2`}>{item?.sender?._id === ownData?._id ? "" : item?.sender?.f_name}</div>
+                            </div>
+                            <div>
+                              <div className='p-1'><img className='w-60 h-45 rounded-md' src={item?.picture} alt="msg-pic" /></div>
+                            </div>
+                            {item?.message && <div>
+                              <div className={`text-sm px-2`}>{item?.message}</div>
+                            </div>}
+                            {/* time */}
+                            <span className="text-[11px] pb-1 pr-1 mt-auto text-gray-500 text-right">
+                              {
+                                new Date(item?.createdAt)
+                                  .toLocaleTimeString([], {
+                                    hour: "2-digit",
+                                    minute: "2-digit"
+                                  })
+                              }
+                            </span>
+                          </div>
                         }
                       </div>
                     </div>

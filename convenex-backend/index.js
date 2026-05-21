@@ -3,6 +3,7 @@ const app =  express();
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
 
+// Web Socket
 const {Server} = require('socket.io');
 const http = require('http');
 const server = http.createServer(app);//can't ignore app also as we cant just depend on raw http server because Express handles requests and responses raw http server just tells hey this is url and this is req now I dont know what to do with it. So we create a raw http server and wrap it around our Express app and then pass it 
@@ -24,6 +25,14 @@ io.on("connection",(socket)=>{//"connection" is a Built-in Socket.IO event. It i
         console.log('Message sent.');
         io.to(convoId).emit("receiveMessage",msg);//send the message to the same room you created
     });
+    socket.on("joinCommunityConversation",(convId)=>{
+        console.log(`User joined community conversation of ${convId}`);
+        socket.join(convId);
+    });
+    socket.on("sendCommunityMessage",(convoId,msg)=>{
+        console.log("Message sent.");
+        io.to(convoId).emit("receiveCommunityMessage",msg);
+    })
 });
 
 require("./connection.js");
@@ -42,6 +51,7 @@ const notificationRoutes = require('./routes/notification.js');
 const commentRoutes = require('./routes/comment.js');
 const conversationRoutes = require('./routes/conversation.js');
 const messageRoutes = require('./routes/message.js');
+const communityRoutes = require('./routes/community.js');
 
 app.use("/api/auth",userRoutes);
 app.use("/api/post",postRoutes);
@@ -49,6 +59,14 @@ app.use("/api/notification",notificationRoutes);
 app.use("/api/comment",commentRoutes);
 app.use("/api/conversation",conversationRoutes);
 app.use("/api/message",messageRoutes);
+app.use("/api/community",communityRoutes);
+
+// Razorpay Instance
+const Razorpay = require('razorpay');
+module.exports.instance = new Razorpay({
+    key_id: process.env.RAZORPAY_API_KEY_ID,
+    key_secret: process.env.RAZORPAY_API_KEY_SECRET
+});
 
 const PORT = process.env.PORT || 4000;
 server.listen(4000,()=>{

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import './Navbar2.css'
 import HomeFilledIcon from '@mui/icons-material/HomeFilled';
+import BusinessIcon from '@mui/icons-material/Business';
 import PeopleIcon from '@mui/icons-material/People';
 import WorkIcon from '@mui/icons-material/Work';
 import MessageIcon from '@mui/icons-material/Message';
@@ -72,7 +73,7 @@ const Navbar2 = () => {
                 <Link to={"/feeds"}>
                     <img className='w-9 h-9 mr-5' src="/img/logo.png" alt="logo" />
                 </Link>
-                <div className='relative'>
+                <div className='relative '>
                     <input value={searchTerm} onChange={(e) => {setSearchTerm(e.target.value)}} type="text" placeholder="Search" className='searchInp w-60 bg-gray-100 rounded-sm p-1 cursor-pointer' />
                     {/* Dropdown */}
                     {//Dont show dropdown if search input is empty(searchTerm.length===0) or no users found(searchUsers.length<0)  
@@ -89,10 +90,14 @@ const Navbar2 = () => {
                     }
                 </div>
             </div>
-            <div className='md:flex hidden gap-7 mt-2'>
+            <div className='md:flex hidden gap-7'>
                 <Link to={"/feeds"} className="flex flex-col items-center cursor-pointer">
                     <HomeFilledIcon sx={{ color: location.pathname === '/feeds' ? "#5f20a8" : "gray" }} />
                     <div className={`text-sm border-b-4 ${location.pathname === "/feeds" ? "border-violet-800" : "border-transparent text-gray-500"}`}>Home</div>
+                </Link>
+                <Link to={"/allCommunities"} className='flex flex-col items-center cursor-pointer'>
+                    <BusinessIcon sx={{color:location.pathname==="/allCommunities"?"#5f20a8":"gray"}}/>
+                    <div className={`text-sm border-b-4 ${location.pathname==="/allCommunities"?"border-violet-800":"border-transparent text-gray-500"} `}>All Communities</div>
                 </Link>
                 <Link to={"/myNetwork"} className="flex flex-col items-center cursor-pointer">
                     <PeopleIcon sx={{ color: location.pathname === '/myNetwork' ? "#5f20a8" : "gray" }} />
@@ -107,7 +112,7 @@ const Navbar2 = () => {
                     <div className={`text-sm border-b-4 ${location.pathname === "/messages" ? "border-violet-800" : "border-transparent text-gray-500"}`}>Message</div>
                 </Link>
                 <Link to={"/notifications"} className="flex flex-col items-center cursor-pointer">
-                    <div className='relative'><NotificationsIcon sx={{ color: location.pathname === '/notifications' ? "#5f20a8" : "gray" }} /> {activeNotifsCount>0?<span className='absolute left-4.5 text-[10px] font-semibold text-center w-4 h-4 text-sm rounded-full bg-red-700 text-white'>{activeNotifsCount}</span>:null}</div>
+                    <div className='relative flex items-center'><NotificationsIcon sx={{ color: location.pathname === '/notifications' ? "#5f20a8" : "gray" }} /> {activeNotifsCount>0?<span className='absolute -top-1 -right-2.5 text-[10px] font-semibold text-center w-4 h-4 text-sm rounded-full bg-red-700 text-white'>{activeNotifsCount}</span>:null}</div>
                     <div className={`text-sm border-b-4 ${location.pathname === "/notifications" ? "border-violet-800" : "border-transparent text-gray-500"}`}>Notification</div>
                 </Link>
                 <Link to={`/profile/${userData?._id}`} className="flex flex-col items-center cursor-pointer">
