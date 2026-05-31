@@ -25,12 +25,19 @@ import CreateCommunity from './pages/CreateCommunity/CreateCommunity.jsx'
 import FAQ from './pages/FAQ/FAQ.jsx'
 import CommunityChat from './pages/CommunityChat/CommunityChat.jsx'
 import EventDetails from './pages/EventDetails/EventDetails.jsx'
+import socket from '../socket.js'
 
 function App() {
   const [isLogin,setIsLogin] = useState(localStorage.getItem('isLogin'));
   const changeLoginValue = (val)=>{
     setIsLogin(val);
   };
+  useEffect(()=>{
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    if(userInfo?._id){
+      socket.emit("register",userInfo._id);
+    }
+  },[]);
   return (
     <div className='min-h-screen flex flex-col'>
       {isLogin?<Navbar2/>:<Navbar1 />}

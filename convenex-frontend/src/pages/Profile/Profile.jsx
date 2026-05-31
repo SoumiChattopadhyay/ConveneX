@@ -15,6 +15,7 @@ import SingleExpModal from '../../components/SingleExpModal/SingleExpModal.jsx';
 import { Link, useParams } from 'react-router-dom';
 import axios from "axios";
 import { toast, ToastContainer } from 'react-toastify'
+import socket from '../../../socket.js';
 
 
 const Profile = () => {
@@ -136,9 +137,14 @@ const Profile = () => {
         else if (status === "Connect") {
             await axios.post("http://localhost:4000/api/auth/sendFriendReq", { receiver: userData?._id }, { withCredentials: true }).then((res) => {
                 toast.success(res.data.message);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+                socket.emit("sendFriendReqNotification", {
+                    ownId: ownData._id,
+                    userId: userData._id
+                });
+                fetchDataOnLoad();
+                // setTimeout(() => {
+                //     window.location.reload();    
+                // }, 2000);
             }).catch((err) => {
                 console.log(err);
                 toast.error(err?.response?.data?.error);
@@ -147,9 +153,14 @@ const Profile = () => {
         else if (status === "Approve Request") {
             await axios.post("http://localhost:4000/api/auth/acceptFriendReq", { friendId: userData?._id }, { withCredentials: true }).then((res) => {
                 toast.success(res.data.message);
-                setTimeout(() => {
-                    window.location.reload();
-                }, 2000);
+                socket.emit("sendAcceptReqNotification", {
+                    ownId: ownData._id,
+                    userId: userData._id
+                });
+                fetchDataOnLoad();
+                // setTimeout(() => {
+                //     window.location.reload();
+                // }, 2000);
             }).catch((err) => {
                 console.log(err);
                 toast.error(err?.response?.data?.error);

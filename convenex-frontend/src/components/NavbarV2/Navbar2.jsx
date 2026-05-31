@@ -8,6 +8,7 @@ import MessageIcon from '@mui/icons-material/Message';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useLocation, Link } from 'react-router-dom';
 import axios from 'axios';
+import socket from '../../../socket';
 
 const Navbar2 = () => {
     const [userData, setUserData] = useState(null);
@@ -65,6 +66,20 @@ const Navbar2 = () => {
     }
     useEffect(()=>{
         fetchActiveNotifsCount();
+    },[]);
+
+    useEffect(()=>{
+        const handler = ()=>{
+            setActiveNotifsCount(prev=>prev+1);
+        };
+        socket.on("receiveCommentNotification",handler);//socket listener
+        socket.on("receiveFriendReqNotification",handler);//socket listener
+        socket.on("receiveAcceptReqNotification",handler);//socket listener
+        return ()=>{
+            socket.off("receiveCommentNotification",handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
+            socket.off("receiveFriendReqNotification",handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
+            socket.off("receiveAcceptReqNotification",handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
+        };
     },[]);
 
     return (

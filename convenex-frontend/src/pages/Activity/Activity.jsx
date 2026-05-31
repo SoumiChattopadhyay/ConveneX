@@ -29,7 +29,7 @@ const Activity = () => {
     },[id]);
     
     return (
-        <div className='w-full flex justify-between gap-5 bg-gray-200 p-5 h-screen'>
+        <div className='w-full flex justify-between gap-5 bg-gray-200 p-5'>
             {/* User Profile Card */}
             <div className='w-[19%] hidden sm:block sm:w-[23%] h-fit'>
                 <ProfileCard data={post?.user}/>

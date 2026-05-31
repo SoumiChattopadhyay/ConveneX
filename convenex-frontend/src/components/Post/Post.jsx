@@ -7,6 +7,7 @@ import SendIcon from '@mui/icons-material/Send';
 import axios from 'axios';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify'
+import socket from '../../../socket';
 
 const Post = ({ profile, index, item, personalData, fullHeight }) => {
   // console.log(item);
@@ -51,6 +52,12 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
     if (!commentInput.trim()) return;
     await axios.post("http://localhost:4000/api/comment", { comment: commentInput.trim(), postId: item?._id }, { withCredentials: true }).then(res => {
       console.log(res);
+      socket.emit("sendCommentNotification",{
+        senderId: personalData._id,
+        senderName: personalData.f_name,
+        postId: item._id,
+        postOwnerId: item.user._id
+      });
       setCommentInput("");
       setComments((prev)=>[res.data.comment, ...prev]);
       setNoOfComments((prev)=>prev+1);

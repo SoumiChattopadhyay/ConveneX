@@ -4,6 +4,8 @@ import ProfileCard from '../../components/ProfileCard/ProfileCard'
 import Card from '../../components/Card/Card'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import socket from '../../../socket'
+import { toast } from "react-toastify";
 
 const Notifications = () => {
     const navigate = useNavigate();
@@ -28,10 +30,23 @@ const Notifications = () => {
         });
     };
 
-    useEffect(() => {
-        fetchNotificationsOnLoad();
-    }, []);
+    useEffect(()=>{
+        fetchNotificationsOnLoad()
+    },[]);
 
+    useEffect(() => {
+        const handler = ()=>{
+            fetchNotificationsOnLoad();
+        };
+        socket.on("receiveCommentNotification",handler);
+        socket.on("receiveAcceptReqNotification",handler);
+        socket.on("receiveFriendReqNotification",handler);
+        return ()=>{
+            socket.off("receiveCommentNotification",handler);
+            socket.off("receiveAcceptReqNotification",handler);
+            socket.off("receiveFriendReqNotification",handler);
+        };
+    }, []);
     
     const handleOnclickNotification = async(item)=>{
         await axios.put("http://localhost:4000/api/notification/updateIsRead",{notificationId:item?._id},{withCredentials:true}).then((res)=>{
