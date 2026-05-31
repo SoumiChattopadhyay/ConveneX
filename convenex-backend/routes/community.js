@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {createCommunity,getAllCommunities,getCommunity,addMember,createEvent,getUpcomingEvents,getEvent,registerForEvent} = require('../controller/community.js');
+const {createCommunity,getAllCommunities,getCommunity,addMember,createEvent,getUpcomingEvents,getEvent,registerForEvent,verifyPayment} = require('../controller/community.js');
 const authMiddleware = require('../middlewares/auth.js');
 
 router.post("/createCommunity",authMiddleware.auth,createCommunity);
