@@ -31,6 +31,18 @@ io.on("connection", (socket) => {//"connection" is a Built-in Socket.IO event. I
             io.to(receiverSocket).emit("receiveCommentNotification", data);
         }
     });
+    socket.on("sendAcceptReqNotification",(data)=>{
+        const receiverSocket = onlineUsers.get(data.userId);
+        if(receiverSocket){
+            io.to(receiverSocket).emit("receiveAcceptReqNotification",data);
+        }
+    });
+    socket.on("sendFriendReqNotification",(data)=>{
+        const receiverSocket = onlineUsers.get(data.userId);
+        if(receiverSocket){
+            io.to(receiverSocket).emit("receiveFriendReqNotification",data);
+        }
+    });
     socket.on("disconnect", () => {
         for (const [userId, socketId] of onlineUsers) {
             if (socketId === socket.id) {
