@@ -21,7 +21,8 @@ const PostSchema = new mongoose.Schema({
         default:0
     },
     impressions: {
-        type: Number,
+        type: [mongoose.Schema.Types.ObjectId],
+        ref:"User",
         default:0
     }
 },{timestamps:true});

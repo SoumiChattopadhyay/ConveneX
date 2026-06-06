@@ -109,15 +109,23 @@ exports.updatePostImpressions = async(req,res)=>{
     try{
         let {postId} = req.params;
         let viewerId = req.user._id;
-        const post = await Post.findByIdAndUpdate(userId,{
-            $inc:{
-                postImpressions:1
-            }
-        });
-        const userId = post.user;
-        if(userId.toString()===viewerId.toString()){
-            return res.json({success:true});
+        const post = await Post.findById(postId);
+        
+        if(!post){
+            return res.status(400).json({error:"Post not found."});
         }
+        
+        const userId = post.user;
+        
+        // Only add to impressions if the viewer is NOT the post owner
+        if(userId.toString() !== viewerId.toString()){
+            await Post.findByIdAndUpdate(postId,{
+                $addToSet:{
+                    impressions: viewerId
+                }
+            });
+        }
+        
         return res.json({success:true});
     }catch (err) {
         console.error(err);

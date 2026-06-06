@@ -112,7 +112,7 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
     if(postRef.current){
       observer.observe(postRef.current);
     }
-    return ()=>observer.disconnect;
+    return ()=>observer.disconnect();
   },[item?._id]);//Re-run this effect whenever the value of item._id changes. It does not mean "watch the URL".
 
   return (

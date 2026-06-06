@@ -44,7 +44,7 @@ const Feeds = () => {
   }
 
   const totalPostImpressions = post.reduce((sum,currPost)=>{
-    return sum + currPost.impressions;
+    return sum + currPost.impressions.length;
   },0);
 
   return (
