@@ -20,6 +20,7 @@ import SingleCommunity from './pages/SingleCommunity/SingleCommunity.jsx'
 import Events from './pages/Events/Events.jsx'
 import Register from './pages/Register/Register.jsx'
 import Members from './pages/Members/Members.jsx'
+import CommunityPosts from './pages/CommunityPosts/CommunityPosts.jsx'
 import CreateEvent from './pages/CreateEvent/CreateEvent.jsx'
 import CreateCommunity from './pages/CreateCommunity/CreateCommunity.jsx'
 import FAQ from './pages/FAQ/FAQ.jsx'
@@ -53,6 +54,7 @@ function App() {
           <Route path='/community/:communityId/events' element={isLogin?<Events/>:<Navigate to={" /login"}/>}/>
           <Route path='/community/:communityId/event/:eventId/register' element={isLogin?<Register/>:<Navigate to={" /login"}/>}/>
           <Route path='/community/:communityId/members' element={isLogin?<Members/>:<Navigate to={" /login"}/>}/>
+          <Route path='/community/:communityId/posts' element={isLogin?<CommunityPosts/>:<Navigate to={" /login"}/>}/>
           <Route path='/community/:communityId/communityChat' element={isLogin?<CommunityChat/>:<Navigate to={" /login"}/>}/>
           <Route path='/community/:communityId/createEvent' element={isLogin?<CreateEvent/>:<Navigate to={" /login"}/>}/>
           <Route path='/createCommunity' element={isLogin?<CreateCommunity/>:<Navigate to={" /login"}/>}/>
