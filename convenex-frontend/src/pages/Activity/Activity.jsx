@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useRef } from 'react'
 import Advertisement from '../../components/Advertisement/Advertisement'
 import Post from '../../components/Post/Post'
 import ProfileCard from '../../components/ProfileCard/ProfileCard'
@@ -7,6 +7,8 @@ import { useEffect } from 'react'
 import { useState } from 'react'
 import axios from 'axios'
 const Activity = () => {
+
+    const postRef = useRef();
 
     const {id, postId} = useParams();
     const [ownData, setOwnData] = useState(null);
@@ -27,9 +29,30 @@ const Activity = () => {
         let selfData = localStorage.getItem('userInfo');
         setOwnData(selfData?JSON.parse(selfData):null);
     },[id]);
+
+    useEffect(()=>{
+    const observer = new IntersectionObserver(
+      async([entry])=>{
+        if(entry.isIntersecting){
+          try{
+            await axios.post(`http://localhost:4000/api/post/post-impression/${item?._id}`,{},{withCredentials:true});
+            observer.unobserve(entry.target);
+          }catch(err){
+            console.log(err);
+          }
+        }
+      },
+      {threshold:0.5}
+    );
+    if(postRef.current){
+      observer.observe(postRef.current);
+    }
+    return ()=>observer.disconnect();
+  },[item?._id]);//Re-run this effect whenever the value of item._id changes. It does not mean "watch the URL".
+
     
     return (
-        <div className='w-full flex justify-between gap-5 bg-gray-200 p-5'>
+        <div ref={postRef} className='w-full flex justify-between gap-5 bg-gray-200 p-5'>
             {/* User Profile Card */}
             <div className='w-[19%] hidden sm:block sm:w-[23%] h-fit'>
                 <ProfileCard data={post?.user}/>
