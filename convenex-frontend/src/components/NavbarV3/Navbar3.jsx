@@ -33,6 +33,9 @@ const Navbar3 = () => {
                 <Link to={`/community/${communityId}/members`} className="cursor-pointer px-4 py-2 hover:bg-gray-200 hover:rounded-md">
                     <div className={`text-sm border-b-4 ${location.pathname === `/community/${communityId}/members` ? "border-violet-800" : "border-transparent text-gray-500"}`}>Members</div>
                 </Link>
+                <Link to={`/community/${communityId}/posts`} className="cursor-pointer px-4 py-2 hover:bg-gray-200 hover:rounded-md">
+                    <div className={`text-sm border-b-4 ${location.pathname === `/community/${communityId}/posts` ? "border-violet-800" : "border-transparent text-gray-500"}`}>Posts</div>
+                </Link>
                 <Link to={`/community/${communityId}/communityChat`} className="cursor-pointer px-4 py-2 hover:bg-gray-200 hover:rounded-md">
                     <div className={`text-sm border-b-4 ${location.pathname === `/community/${communityId}/communityChat` ? "border-violet-800" : "border-transparent text-gray-500"}`}>Community Chat</div>
                 </Link>
