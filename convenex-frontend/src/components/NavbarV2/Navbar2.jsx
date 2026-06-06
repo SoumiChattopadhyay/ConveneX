@@ -54,9 +54,9 @@ const Navbar2 = () => {
     const location = useLocation();
     // console.log(location);//check in browser console
 
-    const [activeNotifsCount,setActiveNotifsCount] = useState([]);
-    const fetchActiveNotifsCount = async()=>{
-        await axios.get("http://localhost:4000/api/notification/activeNotifications",{withCredentials:true}).then((res)=>{
+    const [activeNotifsCount, setActiveNotifsCount] = useState([]);
+    const fetchActiveNotifsCount = async () => {
+        await axios.get("http://localhost:4000/api/notification/activeNotifications", { withCredentials: true }).then((res) => {
             console.log(res);
             setActiveNotifsCount(res?.data?.count);
         }).catch((err) => {
@@ -64,24 +64,32 @@ const Navbar2 = () => {
             alert(err?.response?.data?.error);
         });
     }
-    useEffect(()=>{
+    useEffect(() => {
         fetchActiveNotifsCount();
-    },[]);
+    }, []);
 
-    useEffect(()=>{
-        const handler = ()=>{
-            setActiveNotifsCount(prev=>prev+1);
+    useEffect(() => {
+        const handler = () => {
+            setActiveNotifsCount(prev => prev + 1);
         };
-        socket.on("receiveCommentNotification",handler);//socket listener
-        socket.on("receiveFriendReqNotification",handler);//socket listener
-        socket.on("receiveAcceptReqNotification",handler);//socket listener
-        return ()=>{
-            socket.off("receiveCommentNotification",handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
-            socket.off("receiveFriendReqNotification",handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
-            socket.off("receiveAcceptReqNotification",handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
+        socket.on("receiveCommentNotification", handler);//socket listener
+        socket.on("receiveFriendReqNotification", handler);//socket listener
+        socket.on("receiveAcceptReqNotification", handler);//socket listener
+        return () => {
+            socket.off("receiveCommentNotification", handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
+            socket.off("receiveFriendReqNotification", handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
+            socket.off("receiveAcceptReqNotification", handler);//Otherwise multiple listeners can accumulate if Navbar remounts.
         };
-    },[]);
+    }, []);
 
+    const handleProfileViewers = async () => {
+        try {
+            setSearchTerm('');
+            await axios.post(`http://localhost:4000/api/auth/user/profile-view/${item?.user?.id}`, {}, { withCredentials: true });
+        } catch (err) {
+            toast.error(err.message);
+        }
+    }
     return (
         <div className='flex items-center justify-between w-full h-13 px-10 my-2'>
             <div className='flex gap-4 items-center'>
@@ -89,13 +97,13 @@ const Navbar2 = () => {
                     <img className='w-9 h-9 mr-5' src="/img/logo.png" alt="logo" />
                 </Link>
                 <div className='relative '>
-                    <input value={searchTerm} onChange={(e) => {setSearchTerm(e.target.value)}} type="text" placeholder="Search" className='searchInp w-60 bg-gray-100 rounded-sm p-1 cursor-pointer' />
+                    <input value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value) }} type="text" placeholder="Search" className='searchInp w-60 bg-gray-100 rounded-sm p-1 cursor-pointer' />
                     {/* Dropdown */}
                     {//Dont show dropdown if search input is empty(searchTerm.length===0) or no users found(searchUsers.length<0)  
-                        searchUsers.length>0 && searchTerm.length!==0 && <div className="absolute">
+                        searchUsers.length > 0 && searchTerm.length !== 0 && <div className="absolute">
                             {
                                 searchUsers.map((item, index) => {
-                                    return <Link onClick={()=>setSearchTerm('')} to={`/profile/${item?._id}`} key={index} className='border-b-2 border-gray-300 bg-gray-200 w-75 h-9 flex gap-2 items-center rounded-sm cursor-pointer'>
+                                    return <Link onClick={handleProfileViewers} to={`/profile/${item?._id}`} key={index} className='border-b-2 border-gray-300 bg-gray-200 w-75 h-9 flex gap-2 items-center rounded-sm cursor-pointer'>
                                         <div className=' p-1 rounded-sm'><img className='w-7 h-7  rounded-full' src={item?.profilePic} alt="user-logo" /></div>
                                         <div className='px-1 text-gray-600'>{item?.f_name}</div>
                                     </Link>
@@ -111,8 +119,8 @@ const Navbar2 = () => {
                     <div className={`text-sm border-b-4 ${location.pathname === "/feeds" ? "border-violet-800" : "border-transparent text-gray-500"}`}>Home</div>
                 </Link>
                 <Link to={"/allCommunities"} className='flex flex-col items-center cursor-pointer'>
-                    <BusinessIcon sx={{color:location.pathname==="/allCommunities"?"#5f20a8":"gray"}}/>
-                    <div className={`text-sm border-b-4 ${location.pathname==="/allCommunities"?"border-violet-800":"border-transparent text-gray-500"} `}>All Communities</div>
+                    <BusinessIcon sx={{ color: location.pathname === "/allCommunities" ? "#5f20a8" : "gray" }} />
+                    <div className={`text-sm border-b-4 ${location.pathname === "/allCommunities" ? "border-violet-800" : "border-transparent text-gray-500"} `}>All Communities</div>
                 </Link>
                 <Link to={"/myNetwork"} className="flex flex-col items-center cursor-pointer">
                     <PeopleIcon sx={{ color: location.pathname === '/myNetwork' ? "#5f20a8" : "gray" }} />
@@ -127,7 +135,7 @@ const Navbar2 = () => {
                     <div className={`text-sm border-b-4 ${location.pathname === "/messages" ? "border-violet-800" : "border-transparent text-gray-500"}`}>Message</div>
                 </Link>
                 <Link to={"/notifications"} className="flex flex-col items-center cursor-pointer">
-                    <div className='relative flex items-center'><NotificationsIcon sx={{ color: location.pathname === '/notifications' ? "#5f20a8" : "gray" }} /> {activeNotifsCount>0?<span className='absolute -top-1 -right-2.5 text-[10px] font-semibold text-center w-4 h-4 text-sm rounded-full bg-red-700 text-white'>{activeNotifsCount}</span>:null}</div>
+                    <div className='relative flex items-center'><NotificationsIcon sx={{ color: location.pathname === '/notifications' ? "#5f20a8" : "gray" }} /> {activeNotifsCount > 0 ? <span className='absolute -top-1 -right-2.5 text-[10px] font-semibold text-center w-4 h-4 text-sm rounded-full bg-red-700 text-white'>{activeNotifsCount}</span> : null}</div>
                     <div className={`text-sm border-b-4 ${location.pathname === "/notifications" ? "border-violet-800" : "border-transparent text-gray-500"}`}>Notification</div>
                 </Link>
                 <Link to={`/profile/${userData?._id}`} className="flex flex-col items-center cursor-pointer">

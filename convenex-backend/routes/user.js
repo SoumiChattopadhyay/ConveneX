@@ -24,4 +24,6 @@ router.get("/friendList",authMiddleware.auth,userController.getFriendList);
 router.get("/pendingFriendsList",authMiddleware.auth,userController.getPendingFriendsList);
 router.delete("/removeFromFriendList/:friendId",authMiddleware.auth,userController.removeFromFriendList);
 
+router.post("/user/profile-view/:userId",authMiddleware.auth,userController.updateUserProfileViews);
+
 module.exports=router;

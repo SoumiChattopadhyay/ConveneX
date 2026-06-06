@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import Card from '../Card/Card'
 import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import ThumbUpOffAltIcon from '@mui/icons-material/ThumbUpOffAlt';
@@ -11,6 +11,7 @@ import socket from '../../../socket';
 
 const Post = ({ profile, index, item, personalData, fullHeight }) => {
   // console.log(item);
+  const postRef = useRef();//creates a reference to the Post component's div
 
   const [seemore, setseemore] = useState(false);
   const desc = item?.desc;
@@ -86,13 +87,41 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
     }
   }
 
+  const handleProfileViewers = async()=>{
+    try{
+      
+    }catch(err){
+      toast.error(err.message);
+    }
+  }
+
+  useEffect(()=>{
+    const observer = new IntersectionObserver(
+      async([entry])=>{
+        if(entry.isIntersecting){
+          try{
+            await axios.post(`http://localhost:4000/api/post/post-impression/${item?._id}`,{},{withCredentials:true});
+            observer.unobserve(entry.target);
+          }catch(err){
+            console.log(err);
+          }
+        }
+      },
+      {threshold:0.5}
+    );
+    if(postRef.current){
+      observer.observe(postRef.current);
+    }
+    return ()=>observer.disconnect;
+  },[item?._id]);//Re-run this effect whenever the value of item._id changes. It does not mean "watch the URL".
+
   return (
-    <div className={`flex flex-col ${fullHeight?"h-full":"min-h-fit"}`}>
+    <div ref={postRef} className={`flex flex-col ${fullHeight?"h-full":"min-h-fit"}`}>
       <Card padding={0}>
 
         {/* Post's User Details */}
         <div className='flex gap-2 py-3 px-3'>
-          <Link to={`/profile/${item?.user?._id}`}>
+          <Link onClick={handleProfileViewers} to={`/profile/${item?.user?._id}`}>
             <img className='w-11 h-11 rounded-4xl' src={item?.user?.profilePic} alt="profile-icon" />
           </Link>
           <div>

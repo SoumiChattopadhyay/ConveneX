@@ -104,3 +104,23 @@ exports.getAllPostsOfUser = async(req,res)=>{
         return res.status(500).json({error:"Server Error",message:err.message});
     }
 };
+
+exports.updatePostImpressions = async(req,res)=>{
+    try{
+        let {postId} = req.params;
+        let viewerId = req.user._id;
+        const post = await Post.findByIdAndUpdate(userId,{
+            $inc:{
+                postImpressions:1
+            }
+        });
+        const userId = post.user;
+        if(userId.toString()===viewerId.toString()){
+            return res.json({success:true});
+        }
+        return res.json({success:true});
+    }catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Server Error", messgae: err.message });
+    }
+}

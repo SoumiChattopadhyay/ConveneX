@@ -38,9 +38,15 @@ const Feeds = () => {
   }, []);
 
   const [closeModal, setCloseModal] = useState(false);
+
   const handleCloseModal = () => {
     setCloseModal(prev => !prev);
   }
+
+  const totalPostImpressions = post.reduce((sum,currPost)=>{
+    return sum + currPost.impressions;
+  },0);
+
   return (
     <div className='px-5 py-2 xl:px-50 flex gap-4 w-full bg-[#f5f2f7]'>
       
@@ -53,11 +59,11 @@ const Feeds = () => {
           <Card padding={1}>
             <div className='w-full flex justify-between'>
               <div>Profile Viewers</div>
-              <div className='text-violet-600'>23</div>
+              <div className='text-violet-600'>{personalData?.profileViewers?.length}</div>
             </div>
             <div className='w-full flex justify-between'>
               <div>Post Impressions</div>
-              <div className='text-violet-600'>90</div>
+              <div className='text-violet-600'>{totalPostImpressions}</div>
             </div>
           </Card>
         </div>

@@ -287,3 +287,22 @@ exports.removeFromFriendList = async (req, res) => {
         return res.status(500).json({ error: "Server Error", messgae: err.message });
     }
 }
+
+exports.updateUserProfileViews = async(req,res)=>{
+    try{
+        let {userId} = req.params;
+        let viewerId = req.user._id;
+        if(userId.toString()===viewerId.toString()){//prevents self views
+            return res.json({success:true});
+        }
+        const user = await User.findByIdAndUpdate(userId,{
+            $addToSet:{
+                profileViewers:viewerId
+            }
+        });
+        return res.json({success:true});
+    }catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Server Error", messgae: err.message });
+    }
+}

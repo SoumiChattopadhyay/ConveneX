@@ -19,6 +19,10 @@ const PostSchema = new mongoose.Schema({
     comments:{//stores no. of comments(We have a separate comment schema for entire comment)
         type:Number,
         default:0
+    },
+    impressions: {
+        type: Number,
+        default:0
     }
 },{timestamps:true});
 
