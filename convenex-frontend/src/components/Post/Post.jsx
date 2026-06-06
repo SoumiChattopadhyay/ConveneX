@@ -89,7 +89,7 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
 
   const handleProfileViewers = async()=>{
     try{
-      
+      await axios.post(`http://localhost:4000/api/auth/user/profile-view/${item?.user?._id}`,{},{withCredentials:true});
     }catch(err){
       toast.error(err.message);
     }

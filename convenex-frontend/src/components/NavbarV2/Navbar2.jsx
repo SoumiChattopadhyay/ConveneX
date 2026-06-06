@@ -82,14 +82,15 @@ const Navbar2 = () => {
         };
     }, []);
 
-    const handleProfileViewers = async () => {
+    const handleProfileViewers = async (userId) => {
         try {
             setSearchTerm('');
-            await axios.post(`http://localhost:4000/api/auth/user/profile-view/${item?.user?.id}`, {}, { withCredentials: true });
+            await axios.post(`http://localhost:4000/api/auth/user/profile-view/${userId}`, {}, { withCredentials: true });
         } catch (err) {
             toast.error(err.message);
         }
     }
+    
     return (
         <div className='flex items-center justify-between w-full h-13 px-10 my-2'>
             <div className='flex gap-4 items-center'>
@@ -103,7 +104,7 @@ const Navbar2 = () => {
                         searchUsers.length > 0 && searchTerm.length !== 0 && <div className="absolute">
                             {
                                 searchUsers.map((item, index) => {
-                                    return <Link onClick={handleProfileViewers} to={`/profile/${item?._id}`} key={index} className='border-b-2 border-gray-300 bg-gray-200 w-75 h-9 flex gap-2 items-center rounded-sm cursor-pointer'>
+                                    return <Link onClick={()=>handleProfileViewers(item?._id)} to={`/profile/${item?._id}`} key={index} className='border-b-2 border-gray-300 bg-gray-200 w-75 h-9 flex gap-2 items-center rounded-sm cursor-pointer'>
                                         <div className=' p-1 rounded-sm'><img className='w-7 h-7  rounded-full' src={item?.profilePic} alt="user-logo" /></div>
                                         <div className='px-1 text-gray-600'>{item?.f_name}</div>
                                     </Link>
