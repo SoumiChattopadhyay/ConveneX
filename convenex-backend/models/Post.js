@@ -4,6 +4,10 @@ const PostSchema = new mongoose.Schema({
         type:mongoose.Schema.Types.ObjectId,
         ref:"User"
     },
+    community:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Community"
+    },
     desc:{
         type:"String"
     },
@@ -22,8 +26,7 @@ const PostSchema = new mongoose.Schema({
     },
     impressions: {
         type: [mongoose.Schema.Types.ObjectId],
-        ref:"User",
-        default:0
+        ref:"User"
     }
 },{timestamps:true});
 

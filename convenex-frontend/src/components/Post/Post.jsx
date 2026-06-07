@@ -27,7 +27,7 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
   useEffect(() => {
     let selfId = personalData?._id;
     item?.likes?.map((itm) => {
-      if (itm.toString() === selfId.toString()) {
+      if (itm?.toString() === selfId?.toString()) {
         setLiked(true);
       } else {
         setLiked(false);
@@ -53,15 +53,15 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
     if (!commentInput.trim()) return;
     await axios.post("http://localhost:4000/api/comment", { comment: commentInput.trim(), postId: item?._id }, { withCredentials: true }).then(res => {
       console.log(res);
-      socket.emit("sendCommentNotification",{
+      socket.emit("sendCommentNotification", {
         senderId: personalData._id,
         senderName: personalData.f_name,
         postId: item._id,
         postOwnerId: item.user._id
       });
       setCommentInput("");
-      setComments((prev)=>[res.data.comment, ...prev]);
-      setNoOfComments((prev)=>prev+1);
+      setComments((prev) => [res.data.comment, ...prev]);
+      setNoOfComments((prev) => prev + 1);
       setComment(true);
     }).catch(err => {
       console.log(err);
@@ -77,62 +77,80 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
     });
   }
 
-  const copyToClipboard = async()=>{//whenever someone clicks share button on any post - it's link is copied to his clickboard
-    try{
+  const copyToClipboard = async () => {//whenever someone clicks share button on any post - it's link is copied to his clickboard
+    try {
       let string = `http://localhost:5173/profile/${item?.user?._id}/activity/${item?._id}`;
       await navigator.clipboard.writeText(string);//navigator is default no need to import
       toast.success("Copied to clipboard!");
-    }catch(err){
-      toast.error("Failed to copy!",err);
+    } catch (err) {
+      toast.error("Failed to copy!", err);
     }
   }
 
-  const handleProfileViewers = async()=>{
-    try{
-      await axios.post(`http://localhost:4000/api/auth/user/profile-view/${item?.user?._id}`,{},{withCredentials:true});
-    }catch(err){
+  const handleProfileViewers = async () => {
+    try {
+      await axios.post(`http://localhost:4000/api/auth/user/profile-view/${item?.user?._id}`, {}, { withCredentials: true });
+    } catch (err) {
       toast.error(err.message);
     }
   }
 
-  useEffect(()=>{
+  useEffect(() => {
     const observer = new IntersectionObserver(
-      async([entry])=>{
-        if(entry.isIntersecting){
-          try{
-            await axios.post(`http://localhost:4000/api/post/post-impression/${item?._id}`,{},{withCredentials:true});
+      async ([entry]) => {
+        if (entry.isIntersecting) {
+          try {
+            await axios.post(`http://localhost:4000/api/post/post-impression/${item?._id}`, {}, { withCredentials: true });
             observer.unobserve(entry.target);
-          }catch(err){
+          } catch (err) {
             console.log(err);
           }
         }
       },
-      {threshold:0.5}
+      { threshold: 0.5 }
     );
-    if(postRef.current){
+    if (postRef.current) {
       observer.observe(postRef.current);
     }
-    return ()=>observer.disconnect();
-  },[item?._id]);//Re-run this effect whenever the value of item._id changes. It does not mean "watch the URL".
+    return () => observer.disconnect();
+  }, [item?._id]);//Re-run this effect whenever the value of item._id changes. It does not mean "watch the URL".
 
   return (
-    <div ref={postRef} className={`flex flex-col ${fullHeight?"h-full":"min-h-fit"}`}>
+    <div ref={postRef} className={`flex flex-col ${fullHeight ? "h-full" : "min-h-fit"}`}>
       <Card padding={0}>
 
-        {/* Post's User Details */}
-        <div className='flex gap-2 py-3 px-3'>
-          <Link onClick={handleProfileViewers} to={`/profile/${item?.user?._id}`}>
-            <img className='w-11 h-11 rounded-4xl' src={item?.user?.profilePic} alt="profile-icon" />
-          </Link>
-          <div>
-            <div className='font-semibold text-md'>{item?.user?.f_name}</div>
-            <div className='text-xs text-gray-400'>{item?.user?.headline}</div>
+        {/* Post's Community Details */}
+        {
+          item?.community && <div className='flex gap-2 py-3 px-3'>
+            <Link onClick={handleProfileViewers} to={`/community/${item?.community?._id}`}>
+              <img className='border border-gray-300 w-11 h-11 rounded-4xl' src={item?.community?.logo} alt="profile-icon" />
+            </Link>
+            <div>
+              <div className='font-semibold text-md'>{item?.community?.name}</div>
+              <div className="text-xs text-gray-400">
+                Posted by {item.user?.f_name}
+              </div>
+            </div>
           </div>
-        </div>
+        }
+
+        {/* Post's User Details */}
+        {
+          !item?.community && <div className='flex gap-2 py-3 px-3'>
+            <Link onClick={handleProfileViewers} to={`/profile/${item?.user?._id}`}>
+              <img className='w-11 h-11 rounded-4xl' src={item?.user?.profilePic} alt="profile-icon" />
+            </Link>
+            <div>
+              <div className='font-semibold text-md'>{item?.user?.f_name}</div>
+              <div className='text-xs text-gray-400'>{item?.user?.headline}</div>
+            </div>
+          </div>
+        }
+
         {/* Post Description */}
         {
-          <div className={`text-md px-3 py-2 ${seemore?"h-auto":"h-10"}`}>
-            {seemore ? desc : desc?.length>50 ?`${desc.slice(0, 50)}...` : `${desc}`}
+          <div className={`text-md px-3 py-2 ${seemore ? "h-auto" : "h-10"}`}>
+            {seemore ? desc : desc?.length > 50 ? `${desc.slice(0, 50)}...` : `${desc}`}
             {desc?.length < 50 ? null : <span onClick={() => setseemore(prev => !prev)} className='text-xs text-gray-500 cursor-pointer'>{seemore ? "See Less" : "See More"}</span>}
           </div>
         }
@@ -175,13 +193,24 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
         }
 
         {/* Add Comment */}
-        {!profile && comment && <div className="flex p-3 items-center gap-3 w-full h-20">
-          <img className='w-10 h-10 rounded-4xl object-cover' src={personalData?.profilePic} alt="profile-icon" />
-          <form onSubmit={handleSendComment} className='w-full flex gap-2'>
-            <input value={commentInput} onChange={(e)=>setCommentInput(e.target.value)} type="text" placeholder='Add a comment' className='hover:bg-gray-100 border p-2 rounded-4xl w-[80%]' />
-            <button className='bg-violet-600 text-white px-5 py-1 rounded-4xl cursor-pointer'>Send</button>
-          </form>
-        </div>
+        {
+          !profile && item?.community && comment && <div className="flex p-3 items-center gap-3 w-full h-20">
+            <img className='w-10 h-10 rounded-4xl object-cover' src={item?.community?.logo} alt="profile-icon" />
+            <form onSubmit={handleSendComment} className='w-full flex gap-2'>
+              <input value={commentInput} onChange={(e) => setCommentInput(e.target.value)} type="text" placeholder='Add a comment' className='hover:bg-gray-100 border p-2 rounded-4xl w-[80%]' />
+              <button className='bg-violet-600 text-white px-5 py-1 rounded-4xl cursor-pointer'>Send</button>
+            </form>
+          </div>
+        }
+
+        {
+          !profile && !item?.community && comment && <div className="flex p-3 items-center gap-3 w-full h-20">
+            <img className='w-10 h-10 rounded-4xl object-cover' src={personalData?.profilePic} alt="profile-icon" />
+            <form onSubmit={handleSendComment} className='w-full flex gap-2'>
+              <input value={commentInput} onChange={(e) => setCommentInput(e.target.value)} type="text" placeholder='Add a comment' className='hover:bg-gray-100 border p-2 rounded-4xl w-[80%]' />
+              <button className='bg-violet-600 text-white px-5 py-1 rounded-4xl cursor-pointer'>Send</button>
+            </form>
+          </div>
         }
 
         {/* Comment Section*/}

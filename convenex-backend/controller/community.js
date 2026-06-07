@@ -154,6 +154,22 @@ exports.getUpcomingEvents = async (req, res) => {
     }
 }
 
+exports.getAllEvents = async (req, res) => {
+    try {
+        const { communityId } = req.params;
+        const events = await Event.find({
+            community: communityId
+        }).populate("community");
+        return res.status(200).json({
+            message: "Events fetched successfully",
+            events: events
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Server Error", message: err.message });
+    }
+}
+
 exports.getEvent = async (req, res) => {
     try {
         const { eventId } = req.params;

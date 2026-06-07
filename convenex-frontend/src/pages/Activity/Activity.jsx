@@ -32,7 +32,9 @@ const Activity = () => {
         <div className='w-full flex justify-between gap-5 bg-gray-200 p-5'>
             {/* User Profile Card */}
             <div className='w-[19%] hidden sm:block sm:w-[23%] h-fit'>
-                <ProfileCard data={post?.user}/>
+                {
+                    !post?.community && <ProfileCard data={post?.user}/>
+                }
             </div>
 
             {/* User Single Post */}
@@ -44,7 +46,9 @@ const Activity = () => {
 
             {/* User Advertisement Card */}
             <div className='top-19 sticky w-[26%] sm:hidden md:block h-fit'>
-                <Advertisement />
+                {
+                    !post?.community && <Advertisement />
+                }
             </div>
         </div>
     )

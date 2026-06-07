@@ -205,8 +205,8 @@ const CommunityChat = () => {
                                                             <div>
                                                                 <div className={`${isOwnMessage ? "mx-1 mt-1" : ""}text-sm font-semibold m-2`}>{item?.sender?._id === userData?._id ? "" : item?.sender?.f_name}</div>
                                                             </div>
-                                                            <div>
-                                                                <div className='p-1'><img className='w-60 h-45 rounded-md' src={item?.picture} alt="msg-pic" /></div>
+                                                            <div className='w-60 m-auto'>
+                                                                <div className='p-1 w-full'><img className='w-full h-45 rounded-md' src={item?.picture} alt="msg-pic" /></div>
                                                             </div>
                                                             {item?.message && <div>
                                                                 <div className={`text-sm px-2`}>{item?.message}</div>

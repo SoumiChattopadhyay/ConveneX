@@ -1,54 +1,111 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import Card from '../../components/Card/Card';
+import { useParams } from 'react-router-dom';
+import axios from 'axios';
+import { toast, ToastContainer } from 'react-toastify';
+import Post from '../../components/Post/Post';
+import Modal from '../../components/Modal/Modal';
+import PostModal from '../../components/PostModal/PostModal';
+import Loader from '../../components/Loader/Loader';
+import Navbar3 from '../../components/NavbarV3/Navbar3';
+import CommunityPostModal from '../../components/CommunityPostModal/CommunityPostModal';
 
 const CommunityPosts = () => {
-  return (
-    <div className='px-5 py-2 xl:px-50 flex gap-4 w-full bg-[#f5f2f7]'>
-      
-      {/* Left side */}
-      <div className='w-[21%] sm:block sm:w-[23%] hidden py-5'>
-      </div>
+	const { communityId } = useParams();
+	const [community, setCommunity] = useState(null);
+	const [userData, setUserData] = useState(null);
+	const [posts, setPosts] = useState(null);
 
-      {/* Middle Side */}
-      <div className='w-full flex flex-col py-5 sm:w-[50%] '>
-        <Card padding={1}>
-          <div className="flex flex-col gap-6">
-            <div className="flex gap-2 w-full">
-              <img className='w-11 h-11 rounded-4xl' src={personalData?.profilePic} alt="profile-icon" />
-              <div onClick={() => setCloseModal(true)} className='w-full px-3 py-3 border rounded-3xl hover:bg-gray-200 cursor-pointer'>Start a post</div>
-            </div>
-            <div className="flex w-full justify-between">
-              <div onClick={() => setCloseModal(true)} className="flex p-2 gap-1 justify-center w-[33%] rounded-3xl cursor-pointer hover:bg-gray-200">Video <VideoCameraBackIcon sx={{ color: "green" }} /></div>
-              <div onClick={() => setCloseModal(true)} className="flex p-2 gap-1 justify-center w-[33%] rounded-3xl cursor-pointer hover:bg-gray-200">Photo <InsertPhotoIcon sx={{ color: "blue" }} /> </div>
-              <div onClick={() => setCloseModal(true)} className="flex p-2 gap-1 justify-center w-[33%] rounded-3xl cursor-pointer hover:bg-gray-200">Article <ArticleIcon sx={{ color: "orange" }} /> </div>
-            </div>
-          </div>
-        </Card>
+	const fetchCommunity = async () => {
+		await axios.get(`http://localhost:4000/api/community/getCommunity/${communityId}`, { withCredentials: true }).then((res) => {
+			// console.log(res);
+			setCommunity(res?.data?.community);
+		}).catch((err) => {
+			toast.error(err);
+		});
+	}
+	const fetchPosts = async () => {
+		await axios.get(`http://localhost:4000/api/post/getAllPostsofCommunity/${communityId}`).then((res) => {
+			setPosts(res?.data?.posts);
+		}).catch((err) => {
+			toast.error(err);
+		});
+	}
+	useEffect(() => {
+		fetchCommunity();
+		fetchPosts();
+	}, []);
 
-        <div className='border-b border-gray-400 w-full mb-4' />
+	const [closeModal, setCloseModal] = useState(false);
 
-        <div className='w-full'>
-          {
-            post.map((item,index)=>{
-              return <Post item={item} personalData={personalData} index={index} key={item._id} fullHeight={0}/>;
-            })
-          }
-        </div>
-      </div>
+	const handleCloseModal = () => {
+		setCloseModal(prev => !prev);
+	}
 
-      {/* Right Side */}
-      <div className='w-[26%] sm:hidden md:block py-5'>
-      </div>
+	useEffect(() => {
+		setUserData(JSON.parse(localStorage.getItem('userInfo')));
+	}, []);
 
-      {closeModal &&
-        <Modal closeModal={handleCloseModal}>
-          <PostModal personalData={personalData}/>
-        </Modal>}
+	const isMember = community?.members?.some((member) => (member?._id.toString() === userData?._id?.toString()));
+	
+	const totalPostImpressions = posts?.reduce((sum, currPost) => {
+		return sum + currPost.impressions.length;
+	}, 0);
+	return (
+		<>
+			<Navbar3 />
+			<div className='px-5 py-2 xl:px-50 flex gap-4 w-full bg-[#f5f2f7]'>
+				{/* Left side */}
+				<div className='w-[21%] sm:block sm:w-[23%] hidden py-5'>
+				</div>
 
-      {/* <Loader/> */}
-      {/* We will show this when our api call is happening and until it is not completed, when api call is successful we will show the content*/}
-    <ToastContainer/>
-    </div>
-  )
+				{/* Middle Side */}
+				<div className='w-full flex flex-col py-5 sm:w-[50%] '>
+					{
+						isMember && <>
+							<Card padding={1}>
+								<div className="flex flex-col gap-6">
+									<div className="flex gap-2 w-full">
+										<img className='w-11 h-11 rounded-4xl border border-gray-300' src={community?.logo} alt="profile-icon" />
+										<div onClick={() => setCloseModal(true)} className='w-full px-3 py-3 border border-gray-300 rounded-3xl hover:bg-gray-200 cursor-pointer'>Start a post</div>
+									</div>
+								</div>
+							</Card>
+							<div className='border-b border-gray-400 w-full mb-4' />
+						</>
+					}
+
+					<div className='w-full'>
+						{
+							posts?.map((item, index) => {
+								return <Post item={item} index={index} key={item._id} fullHeight={0} />;
+							})
+						}
+					</div>
+				</div>
+
+				{/* Right Side */}
+				<div className='w-[26%] sm:hidden md:block py-5'>
+					<div className='w-[78%] my-5 mx-15'>
+						<Card padding={1}>
+							<div className='w-full flex justify-between'>
+								<div>Post Impressions</div>
+								<div className='text-violet-600'>{totalPostImpressions}</div>
+							</div>
+						</Card>
+					</div>
+				</div>
+
+				{closeModal &&
+					<Modal closeModal={handleCloseModal}>
+						<CommunityPostModal community={community} />
+					</Modal>}
+				{/* <Loader/> */}
+				{/* We will show this when our api call is happening and until it is not completed, when api call is successful we will show the content*/}
+				<ToastContainer />
+			</div>
+		</>
+	)
 }
 
 export default CommunityPosts
