@@ -193,7 +193,7 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
         }
 
         {/* Add Comment */}
-        {
+        {/* {
           !profile && item?.community && comment && <div className="flex p-3 items-center gap-3 w-full h-20">
             <img className='w-10 h-10 rounded-4xl object-cover' src={item?.community?.logo} alt="profile-icon" />
             <form onSubmit={handleSendComment} className='w-full flex gap-2'>
@@ -201,10 +201,10 @@ const Post = ({ profile, index, item, personalData, fullHeight }) => {
               <button className='bg-violet-600 text-white px-5 py-1 rounded-4xl cursor-pointer'>Send</button>
             </form>
           </div>
-        }
+        } */}
 
         {
-          !profile && !item?.community && comment && <div className="flex p-3 items-center gap-3 w-full h-20">
+          !profile && comment && <div className="flex p-3 items-center gap-3 w-full h-20">
             <img className='w-10 h-10 rounded-4xl object-cover' src={personalData?.profilePic} alt="profile-icon" />
             <form onSubmit={handleSendComment} className='w-full flex gap-2'>
               <input value={commentInput} onChange={(e) => setCommentInput(e.target.value)} type="text" placeholder='Add a comment' className='hover:bg-gray-100 border p-2 rounded-4xl w-[80%]' />
