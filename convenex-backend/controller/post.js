@@ -103,7 +103,7 @@ exports.getPostByPostId = async (req, res) => {
 exports.getTop5PostsOfUser = async (req, res) => {
     try {
         const { userId } = req.params;
-        let posts = await Post.find({ user: userId }).sort({ createdAt: -1 }).populate("user", "-password").limit(5);//createdAt is usually a timestamp field that stores when a document was created in MongoDB. In Mongoose, it commonly appears automatically when you enable timestamps:true. createdAt: -1 → newest posts first (descending order). createdAt: 1 → oldest posts first (ascending order)
+        let posts = await Post.find({ user: userId, community:null }).sort({ createdAt: -1 }).populate("user", "-password").limit(5);//createdAt is usually a timestamp field that stores when a document was created in MongoDB. In Mongoose, it commonly appears automatically when you enable timestamps:true. createdAt: -1 → newest posts first (descending order). createdAt: 1 → oldest posts first (ascending order)
 
         return res.status(200).json({
             message: "Fetched top 5 Posts of user.",

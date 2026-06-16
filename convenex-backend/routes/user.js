@@ -26,4 +26,7 @@ router.delete("/removeFromFriendList/:friendId",authMiddleware.auth,userControll
 
 router.post("/user/profile-view/:userId",authMiddleware.auth,userController.updateUserProfileViews);
 
+router.get("/google-calendar/connect",authMiddleware.auth,userController.connectGoogleCalendar);
+router.get("/google-calendar/callback",authMiddleware.auth,userController.googleCalendarCallback);
+
 module.exports=router;

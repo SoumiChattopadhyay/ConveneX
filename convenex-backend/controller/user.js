@@ -4,6 +4,7 @@ const bcryptjs = require('bcryptjs');
 const { OAuth2Client } = require("google-auth-library");
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 const jwt = require('jsonwebtoken');
+const {google} = require('googleapis');//require google's library
 
 const cookieOptions = {
     httpOnly: true,
@@ -35,6 +36,35 @@ exports.loginThroughGmail = async (req, res) => {
         return res.status(200).json({ user: userExists });
     } catch (err) {
         return res.status(500).json({ error: "Server Error", message: err.message });
+    }
+}
+
+const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+);
+
+exports.connectGoogleCalendar = async(req,res)=>{
+    const url = oauth2Client.generateAuthUrl({
+        access_type:"offline",
+        prompt:"consent",
+        scope:[
+            "https://www.googleapis.com/auth/calendar.events"
+        ]
+    });
+    res.redirect(url);
+}
+
+exports.googleCalendarCallback = async(req,res)=>{
+    try{
+        const code = req.query.code;
+        const {tokens} = oauth2Client.getToken(code);
+        res.json(tokens);
+    }catch(err){
+        res.status(500).json({
+            error:err.message
+        });
     }
 }
 
