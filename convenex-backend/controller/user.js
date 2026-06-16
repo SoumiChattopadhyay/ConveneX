@@ -45,7 +45,7 @@ const oauth2Client = new google.auth.OAuth2(
     process.env.GOOGLE_REDIRECT_URI
 );
 
-exports.connectGoogleCalendar = async(req,res)=>{
+exports.connectGoogleCalendar = (req,res)=>{
     const url = oauth2Client.generateAuthUrl({
         access_type:"offline",
         prompt:"consent",
@@ -60,7 +60,7 @@ exports.connectGoogleCalendar = async(req,res)=>{
 exports.googleCalendarCallback = async(req,res)=>{
     try{
         const code = req.query.code;
-        const {tokens} = oauth2Client.getToken(code);
+        const {tokens} = await oauth2Client.getToken(code);
         await User.findByIdAndUpdate(req.user._id,{
             googleCalendarConnected: true,
             googleAccessToken: tokens.access_token,
