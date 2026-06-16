@@ -5,6 +5,7 @@ const Form = require("../models/Form.js");
 const Registration = require("../models/Registration.js");
 const User = require("../models/User.js");
 const razorpay = require('../utils/razorpay.js');
+const {google} = require('googleapis');//require google's library
 
 exports.createCommunity = async (req, res) => {
     try {
@@ -125,6 +126,47 @@ exports.createEvent = async (req, res) => {
                 }
             }
         );
+        const user = await User.findById(id);
+        if(user.googleAccessToken!=="" && user.googleRefreshToken!=="" && newEvent.mode!=="offline"){
+            const oauth2Client = new google.auth.OAuth2(
+            process.env.GOOGLE_CLIENT_ID,
+            process.env.GOOGLE_CLIENT_SECRET,
+            process.env.GOOGLE_REDIRECT_URI
+            );
+            oauth2Client.setCredentials({
+                access_token: user.googleAccessToken,
+                refresh_token: user.googleRefreshToken
+            });
+            const calendar = google.calendar({
+                version:"v3",
+                auth:oauth2Client
+            });
+            const response = await calendar.events.insert({
+                calendarId: "primary",
+                conferenceDataVersion: 1,
+                requestBody:{
+                    summary: newEvent.name,
+                    description: newEvent.description,
+                    start:{
+                        dateTime: newEvent.startDateTime
+                    },
+                    end:{
+                        dateTime: newEvent.endDateTime
+                    },
+                    conferenceData:{
+                        createRequest:{
+                            requestId: Date.now().toString()
+                        }
+                    }
+                }
+            });
+            console.log(response);
+            if(newEvent.type==="online"){
+                newEvent.meetingLink = response.data.hangoutLink;
+            }else{
+                newEvent.venueDetails.venueLink = response.data.hangoutLink;
+            }
+        }
         return res.status(201).json({
             message: "Event created successfully",
             event: newEvent
