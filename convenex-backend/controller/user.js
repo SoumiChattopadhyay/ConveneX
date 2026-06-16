@@ -51,7 +51,8 @@ exports.connectGoogleCalendar = async(req,res)=>{
         prompt:"consent",
         scope:[
             "https://www.googleapis.com/auth/calendar.events"
-        ]
+        ],
+        state: req.query.communityId
     });
     res.redirect(url);
 }
@@ -60,7 +61,12 @@ exports.googleCalendarCallback = async(req,res)=>{
     try{
         const code = req.query.code;
         const {tokens} = oauth2Client.getToken(code);
-        res.json(tokens);
+        await User.findByIdAndUpdate(req.user._id,{
+            googleCalendarConnected: true,
+            googleAccessToken: tokens.access_token,
+            googleRefreshToken: tokens.refresh_token
+        });
+        res.redirect(`http://localhost:5173/community/${req.query.state}/createEvent`);
     }catch(err){
         res.status(500).json({
             error:err.message

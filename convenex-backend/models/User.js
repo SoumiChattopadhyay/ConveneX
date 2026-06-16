@@ -84,7 +84,13 @@ const UserSchema = new mongoose.Schema({//See the /profile page
         type: [mongoose.Schema.Types.ObjectId],
         ref:"User",
         default:[]
-    }
+    },
+    googleCalendarConnected:{
+        type:Boolean,
+        default:false
+    },
+    googleAccessToken:String,
+    googleRefreshToken:String
 },{timestamps:true}//to keep track when this user entry was created in Database and when any kind of updations were made in this database entry
 );
 
