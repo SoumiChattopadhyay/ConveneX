@@ -127,7 +127,7 @@ exports.createEvent = async (req, res) => {
             }
         );
         const user = await User.findById(id);
-        if(user.googleAccessToken!=="" && user.googleRefreshToken!=="" && newEvent.mode!=="offline"){
+        if(user.googleAccessToken && user.googleRefreshToken && newEvent.mode!=="offline"){
             const oauth2Client = new google.auth.OAuth2(
             process.env.GOOGLE_CLIENT_ID,
             process.env.GOOGLE_CLIENT_SECRET,
@@ -160,12 +160,13 @@ exports.createEvent = async (req, res) => {
                     }
                 }
             });
-            console.log(response);
-            if(newEvent.type==="online"){
+            console.log(response.data);
+            if(newEvent.mode==="online"){
                 newEvent.meetingLink = response.data.hangoutLink;
             }else{
                 newEvent.venueDetails.venueLink = response.data.hangoutLink;
             }
+            await newEvent.save();
         }
         return res.status(201).json({
             message: "Event created successfully",

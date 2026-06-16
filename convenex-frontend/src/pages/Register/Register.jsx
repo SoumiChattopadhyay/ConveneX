@@ -224,7 +224,7 @@ const Register = () => {
 
           <button
             type='submit'
-            className='bg-cyan-500 hover:bg-cyan-600 transition-all duration-300 text-white py-3 rounded-xl font-medium mt-4'
+            className='bg-cyan-500 hover:bg-cyan-600 transition-all duration-300 text-white py-3 rounded-xl font-medium mt-4 cursor-pointer'
           >
             Register For Event
           </button>

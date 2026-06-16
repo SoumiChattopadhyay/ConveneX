@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import axios from 'axios';
@@ -103,6 +103,30 @@ const CreateEvent = () => {
             toast.error(err?.response?.data?.error);
         });
     };
+    const connectGoogleCalendar = ()=>{
+        try{
+            window.location.href = `http://localhost:4000/api/auth/google-calendar/connect?communityId=${communityId}`;
+        }catch(err){
+            toast.error(err?.response?.data?.error);
+        }
+    };
+    const [user,setUser] = useState(null);
+    const fetchUser = async()=>{
+        await axios.get("http://localhost:4000/api/auth/self",{withCredentials:true}).then((res)=>{
+            setUser(res?.data?.user);
+        }).catch((err)=>{
+            console.log(err);
+            toast.error(err?.response?.data?.error);
+        });
+        // setUser(localStorage.getItem("userInfo"));
+    }
+    useEffect(()=>{
+        fetchUser()
+    },[]);
+    // const showMeetingLink = async()=>{
+
+    // }
+
     return (
         <>
             <div className='bg-[#f5f2f7] p-5 w-full relative'>
@@ -115,7 +139,7 @@ const CreateEvent = () => {
                         </div>
                         <div className='w-[60%] mb-6'>
                             <div className='w-full ml-2 mb-2'>Event Banner Image:</div>
-                            <input name="bannerImage" value={eventData.bannerImage} onChange={handleChange} type="text" placeholder="Enter Event Name" id="name" className="bg-white w-full border rounded-xl px-4 py-3" />
+                            <input name="bannerImage" value={eventData.bannerImage} onChange={handleChange} type="text" placeholder="Enter Image Link" id="name" className="bg-white w-full border rounded-xl px-4 py-3" />
                         </div>
                         <div className='w-[60%] mb-6'>
                             <div className='w-full ml-2 mb-2'>Event Description:</div>
@@ -161,8 +185,14 @@ const CreateEvent = () => {
                         </div>
                         {
                             (eventData?.mode?.toLowerCase() !== "offline") && <div className='w-[60%] mb-6'>
-                                <div className='w-full ml-2 mb-2'>Meeting Link:</div>
-                                <input name="meetingLink" value={eventData.meetingLink} onChange={handleChange} type="text" placeholder="Enter Meeting Link" id="meetingLink" className="bg-white w-full border rounded-xl px-4 py-3" />
+                                <div className='w-full ml-2 mb-2'>For Meeting Link:</div>
+                                {
+                                    !user?.googleCalendarConnected && <div onClick={connectGoogleCalendar} className='py-2 px-4 w-fit cursor-pointer rounded-2xl bg-blue-100 text-blue-700 shadow-blue-400 shadow-2xs hover:bg-blue-200'>Connect with Google Calendar</div>
+                                }
+                                {
+                                    user?.googleCalendarConnected && <div onClick={connectGoogleCalendar} className='py-2 px-4 w-fit cursor-pointer rounded-md bg-gray-200 '>Google Calendar Connected ✔️</div>
+                                }
+                                {/* <input name="meetingLink" value={eventData.meetingLink} onChange={handleChange} type="text" placeholder="Enter Meeting Link" id="meetingLink" className="bg-white w-full border rounded-xl px-4 py-3" /> */}
                             </div>
                         }
                         {
@@ -243,7 +273,7 @@ const CreateEvent = () => {
                             </div>
 
                         </div>
-                        <button onClick={handleCreateEvent} className="mt-8 ml-60 bg-green-600 text-white px-8 py-2 rounded-xl">Publish Event</button>
+                        <button onClick={handleCreateEvent} className="mt-8 ml-60 bg-green-600 text-white px-8 py-2 rounded-xl cursor-pointer">Publish Event</button>
                     </>
                 }
                 <ToastContainer />
