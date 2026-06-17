@@ -47,7 +47,7 @@ const CommunityPosts = () => {
 	}, []);
 
 	const isMember = community?.members?.some((member) => (member?._id.toString() === userData?._id?.toString()));
-	
+
 	const totalPostImpressions = posts?.reduce((sum, currPost) => {
 		return sum + currPost.impressions.length;
 	}, 0);
@@ -87,12 +87,10 @@ const CommunityPosts = () => {
 				{/* Right Side */}
 				<div className='w-[26%] sm:hidden md:block py-5'>
 					<div className='w-[78%] my-5 mx-15'>
-						<Card padding={1}>
-							<div className='w-full flex justify-between'>
-								<div>Post Impressions</div>
-								<div className='text-violet-600'>{totalPostImpressions}</div>
-							</div>
-						</Card>
+						<div className='w-full flex justify-between bg-cyan-100 rounded-md py-6 px-5 border border-cyan-800'>
+							<div className='text-cyan-800'>Post Impressions</div>
+							<div className='text-cyan-800'>{totalPostImpressions}</div>
+						</div>
 					</div>
 				</div>
 
