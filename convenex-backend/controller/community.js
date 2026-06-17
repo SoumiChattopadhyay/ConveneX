@@ -217,7 +217,7 @@ exports.getAllEvents = async (req, res) => {
 exports.getEvent = async (req, res) => {
     try {
         const { eventId } = req.params;
-        const event = await Event.findById(eventId).populate("formId").populate("organizer");
+        const event = await Event.findById(eventId).populate("formId").populate("organizer attendees");
         return res.status(200).json({
             message: "Event fetched successfully",
             event: event

@@ -3,19 +3,22 @@ import { Link, useParams } from 'react-router-dom'
 import { ToastContainer, toast } from 'react-toastify';
 import axios from 'axios';
 import Navbar3 from '../../components/NavbarV3/Navbar3.jsx'
+import ProfileCard from '../../components/ProfileCard/ProfileCard.jsx';
 
 const EventDetails = () => {
     const { communityId, eventId } = useParams();
     const [event, setEvent] = useState(null);
-    const [community, setCommunity] = useState(null)
-        ; const fetchEventsOnLoad = async () => {
-            await axios.get(`http://localhost:4000/api/community/${communityId}/event/${eventId}`).then((res) => {
-                setEvent(res?.data?.event);
-            }).catch((err) => {
-                console.log(err);
-                return toast.error(err?.response?.data?.error);
-            });
-        }
+    const [community, setCommunity] = useState(null);
+    const [regUsers, setRegUsers] = useState([]);
+    const fetchEventsOnLoad = async () => {
+        await axios.get(`http://localhost:4000/api/community/${communityId}/event/${eventId}`).then((res) => {
+            setEvent(res?.data?.event);
+            setRegUsers(res?.data?.event?.attendees);
+        }).catch((err) => {
+            console.log(err);
+            return toast.error(err?.response?.data?.error);
+        });
+    }
     useEffect(() => {
         if (eventId) fetchEventsOnLoad();
     }, [eventId]);
@@ -31,9 +34,9 @@ const EventDetails = () => {
     }
     const [user, setUser] = useState(null);
     const fetchUser = async () => {
-        await axios.get("http://localhost:4000/api/auth/self",{withCredentials:true}).then((res)=>{
+        await axios.get("http://localhost:4000/api/auth/self", { withCredentials: true }).then((res) => {
             setUser(res?.data?.user);
-        }).catch((err)=>{
+        }).catch((err) => {
             console.log(err);
             toast.error(err?.response?.data?.error);
         });
@@ -209,6 +212,20 @@ const EventDetails = () => {
                             {event?.description}
                         </p>
 
+                    </div>
+
+                    {/* Registered Users */}
+                    <div>
+                        <div className='text-2xl font-semibold mb-5'>Registered Users</div>
+                        <div className="flex gap-8 flex-wrap w-full">
+                            {
+                                regUsers?.map((item,index)=>{
+                                    return <div key={index} className='w-[25%]'>
+                                        <ProfileCard data={item}/>
+                                    </div>
+                                })
+                            }
+                        </div>
                     </div>
 
                 </div>
