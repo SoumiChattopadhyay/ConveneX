@@ -5,7 +5,8 @@ const Form = require("../models/Form.js");
 const Registration = require("../models/Registration.js");
 const User = require("../models/User.js");
 const razorpay = require('../utils/razorpay.js');
-const {google} = require('googleapis');//require google's library
+const crypto = require('crypto');
+const { google } = require('googleapis');//require google's library
 
 exports.createCommunity = async (req, res) => {
     try {
@@ -127,43 +128,43 @@ exports.createEvent = async (req, res) => {
             }
         );
         const user = await User.findById(id);
-        if(user.googleAccessToken && user.googleRefreshToken && newEvent.mode!=="offline"){
+        if (user.googleAccessToken && user.googleRefreshToken && newEvent.mode !== "offline") {
             const oauth2Client = new google.auth.OAuth2(
-            process.env.GOOGLE_CLIENT_ID,
-            process.env.GOOGLE_CLIENT_SECRET,
-            process.env.GOOGLE_REDIRECT_URI
+                process.env.GOOGLE_CLIENT_ID,
+                process.env.GOOGLE_CLIENT_SECRET,
+                process.env.GOOGLE_REDIRECT_URI
             );
             oauth2Client.setCredentials({
                 access_token: user.googleAccessToken,
                 refresh_token: user.googleRefreshToken
             });
             const calendar = google.calendar({
-                version:"v3",
-                auth:oauth2Client
+                version: "v3",
+                auth: oauth2Client
             });
             const response = await calendar.events.insert({
                 calendarId: "primary",
                 conferenceDataVersion: 1,
-                requestBody:{
+                requestBody: {
                     summary: newEvent.name,
                     description: newEvent.description,
-                    start:{
+                    start: {
                         dateTime: newEvent.startDateTime
                     },
-                    end:{
+                    end: {
                         dateTime: newEvent.endDateTime
                     },
-                    conferenceData:{
-                        createRequest:{
+                    conferenceData: {
+                        createRequest: {
                             requestId: Date.now().toString()
                         }
                     }
                 }
             });
             console.log(response.data);
-            if(newEvent.mode==="online"){
+            if (newEvent.mode === "online") {
                 newEvent.meetingLink = response.data.hangoutLink;
-            }else{
+            } else {
                 newEvent.venueDetails.venueLink = response.data.hangoutLink;
             }
             await newEvent.save();
@@ -246,14 +247,84 @@ exports.registerForEvent = async (req, res) => {
             });
         }
 
-        const newRegistration = await Registration.create({
-            user: userId,
-            event: eventId,
-            answers: answers
-        });
-
         const event = await Event.findById(eventId);
-        const user = await User.findById(userId);
+
+        // Free Event
+        if (event.entryFee === 0) {
+            const newRegistration = await Registration.create({
+                user: userId,
+                event: eventId,
+                answers: answers
+            });
+            await Event.findByIdAndUpdate(
+                eventId,
+                {
+                    $addToSet: {
+                        attendees: userId
+                    }
+                }
+            );
+            await User.findByIdAndUpdate(
+                userId,
+                {
+                    $addToSet: {
+                        registeredEvents: eventId
+                    }
+                }
+            );
+            return res.status(201).json({
+                message: "Registered Successfully",
+                registration: newRegistration
+            });
+        }
+
+        //Paid Event
+        const razorpayOrder = await razorpay.orders.create({
+            amount: event.entryFee * 100,
+            currency: "INR",
+            receipt: `evt_${Date.now()}` //we can give any receipt but max limit is 40 chars
+        });
+        return res.status(201).json({
+            message: "Registered for Event!",
+            razorpayOrder
+        });
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Server Error", message: err.message });
+    }
+};
+
+exports.verifyPayment = async (req, res) => {
+    try {
+        const {eventId} = req.params;
+        const { razorpay_order_id, razorpay_payment_id, razorpay_signature, answers } = req.body;
+        const userId = req.user._id;
+        const body = razorpay_order_id + "|" + razorpay_payment_id;
+        const expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_API_KEY_SECRET).update(body).digest('hex');
+        if (expectedSignature !== razorpay_signature) {
+            return res.status(400).json({ error: "Payment verification failed" });
+        }
+        const existingRegistration =
+            await Registration.findOne({
+                user: userId,
+                event: eventId
+            });
+
+        if (existingRegistration) {
+            return res.status(400).json({
+                error: "Already registered"
+            });
+        }
+
+        const registration =
+            await Registration.create({
+                user: userId,
+                event: eventId,
+                answers,
+                paymentId: razorpay_payment_id,
+                orderId: razorpay_order_id,
+                paymentStatus: "SUCCESS"
+            });
 
         await Event.findByIdAndUpdate(
             eventId,
@@ -263,6 +334,7 @@ exports.registerForEvent = async (req, res) => {
                 }
             }
         );
+
         await User.findByIdAndUpdate(
             userId,
             {
@@ -271,38 +343,12 @@ exports.registerForEvent = async (req, res) => {
                 }
             }
         );
-
-        if (event.entryFee === 0) {
-            return res.status(201).json({
-                message: "Registered Successfully",
-                registration: newRegistration
-            });
-        }
-
-        const razorpayOrder = await razorpay.orders.create({
-            amount: event.entryFee * 100,
-            currency: "INR",
-            receipt: newRegistration._id.toString()
-        });
-        return res.status(201).json({
-            message: "Registered for Event!",
-            registration: newRegistration,
-            razorpayOrder
+        return res.status(200).json({
+            message:
+                "Payment verified and registration successful",
+            registration
         });
     } catch (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Server Error", message: err.message });
-    }
-};
-
-exports.verifyPayment = async(req,res)=>{
-    try{
-        const {razorpay_order_id, razorpay_payment_id,razorpay_signature} = req.body;
-        const expectedSignature = crypto.createHmac('sha256',process.env.RAZORPAY_API_KEY_SECRET).update(body).digest('hex');
-        if (expectedSignature !== razorpay_signature) {
-            return res.status(400).json("error", "Payment verification failed");
-        }
-    }catch (err) {
         console.error(err);
         return res.status(500).json({ error: "Server Error", message: err.message });
     }

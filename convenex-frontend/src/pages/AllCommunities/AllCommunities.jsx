@@ -78,4 +78,3 @@ const AllCommunities = () => {
 }
 
 export default AllCommunities
-

@@ -31,13 +31,13 @@ const EventDetails = () => {
     }
     const [user, setUser] = useState(null);
     const fetchUser = async () => {
-        // await axios.get("http://localhost:4000/api/auth/self",{withCredentials:true}).then((res)=>{
-        //     setUser(res?.data?.user);
-        // }).catch((err)=>{
-        //     console.log(err);
-        //     toast.error(err?.response?.data?.error);
-        // });
-        setUser(localStorage.getItem("userInfo"));
+        await axios.get("http://localhost:4000/api/auth/self",{withCredentials:true}).then((res)=>{
+            setUser(res?.data?.user);
+        }).catch((err)=>{
+            console.log(err);
+            toast.error(err?.response?.data?.error);
+        });
+        // setUser(localStorage.getItem("userInfo"));
     }
     useEffect(() => {
         if (communityId) {
@@ -123,7 +123,7 @@ const EventDetails = () => {
                                 </div>
 
                                 <div className='text-2xl font-semibold'>
-                                    {event?.mode.toUpperCase()}
+                                    {event?.mode?.toUpperCase()}
                                 </div>
                             </div>
 

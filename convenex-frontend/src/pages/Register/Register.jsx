@@ -44,8 +44,15 @@ const Register = () => {
         description: 'Test Transaction',
         order_id: `${razorpayOrder?.id}`, // razorpay objects use id not _id
         handler: async function (response) {
-          await axios.post(`http://localhost:4000/api/community/event/${eventId}/verifyPayment`,{...response},{withCredentials:true});
-          window.location.href = `http://localhost:5173/community/${communityId}/event/${eventId}`;
+          try {
+            console.log("Payment Success");
+            console.log(response);
+            await axios.post(`http://localhost:4000/api/community/event/${eventId}/verifyPayment`, { ...response, answers }, { withCredentials: true });
+            window.location.href = `http://localhost:5173/community/${communityId}/event/${eventId}`;
+          } catch (err) {
+            console.log(err);
+            console.log(err?.response?.data);
+          }
         },
         prefill: {
           name: `${answers?.[form?.fields?.find((field) => field.type === "Text")?.fieldId] || ""}`,
@@ -61,6 +68,10 @@ const Register = () => {
         rzp.open();
       } else {
         toast.success("Registered Successfully");
+        setTimeout(() => {
+          window.location.href =
+            `http://localhost:5173/community/${communityId}/event/${eventId}`;
+        }, 1000);
       }
     }).catch((err) => {
       console.log(err);
